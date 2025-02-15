@@ -45,10 +45,14 @@ app.get('/info' , (req, res) => {
     <p>PhoneBook has info for 2 people</p>
     <p>${dateNow}</p>
     `)
-
-  
-
 });
+
+// Get request route for finding individuals
+app.get("/api/persons/:id", (req, res) => {
+  const id = req.params.id
+  const person = data.find(data => data.id === id)
+  res.json(person)
+})
 
 
 
