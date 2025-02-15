@@ -1,5 +1,10 @@
 const express = require('express');
 const app = express();
+var morgan = require('morgan')
+
+// Some middleware, has to be declared before routes
+// 1) Actually apply the Morgan middleware
+app.use(morgan('tiny'));
 
 // For parsing JSON bodies in requests:
 app.use(express.json());
@@ -28,6 +33,9 @@ let data = [
     "number": "39-23-6423122"
   }
 ]
+
+
+
 
 
 // GET request route
@@ -108,6 +116,8 @@ app.post("/api/persons", (req, res) => {
   //Respond with 201 (Created) and the new object named newPerson
   return res.status(201).json(newPerson)
 })
+
+
 
 
 // Start the server:
