@@ -35,6 +35,20 @@ app.get('/api/persons', (req, res) => {
   res.json(data);
 });
 
+// Get request route
+app.get('/info' , (req, res) => {
+
+  // const that create a new Date object
+  const dateNow = new Date().toString();
+
+  res.send(`
+    <p>PhoneBook has info for 2 people</p>
+    <p>${dateNow}</p>
+    `)
+
+  
+
+});
 
 
 
