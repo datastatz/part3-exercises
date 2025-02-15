@@ -6,7 +6,7 @@ app.use(express.json());
 
 
 // All the data of the PhoneBook
-const data = [
+let data = [
   { 
     "id": "1",
     "name": "Arto Hellas", 
@@ -53,6 +53,17 @@ app.get("/api/persons/:id", (req, res) => {
   const person = data.find(data => data.id === id)
   res.json(person)
 })
+
+// DELETE request route for deleting a person by id
+app.delete('/api/persons/:id', (req, res) => {
+  const id = req.params.id;
+
+  // Filter out the person with the given id
+  data = data.filter(person => person.id !== id);
+
+  // Respond with status 204 (No Content) indicating successful deletion
+  res.status(204).end();
+});
 
 
 
