@@ -65,6 +65,49 @@ app.delete('/api/persons/:id', (req, res) => {
   res.status(204).end();
 });
 
+// Adding names and numbers to the backend
+app.post("/api/persons", (req, res) => {
+  
+  //Body of the request
+  const body = req.body 
+
+  // Check if the name already exists in the data array
+  const nameExists = data.some(person => person.name.toLowerCase() === body.name.toLowerCase());
+
+  if (nameExists) {
+    return res.status(400).json({
+      error: 'name must be unique'
+    });
+  }
+
+  if (!body.name){
+    return res.status(400).json({
+      error: 'content missing'
+    })
+  }
+
+  if (!body.number) {
+    return res.status(400).json({ 
+      error: 'Number is missing' 
+    });
+  }
+
+  // Generating a random ID
+  const randID = Math.floor(Math.random() * 1000000).toString()
+
+  // Creating an object for a new entry
+  const newPerson = {
+    id: randID,
+    name: body.name,
+    number: body.number
+  }
+
+  // Pushin the new entry into our data array
+  data.push(newPerson)
+
+  //Respond with 201 (Created) and the new object named newPerson
+  return res.status(201).json(newPerson)
+})
 
 
 // Start the server:
