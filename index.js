@@ -2,11 +2,13 @@ const express = require('express');
 const cors = require('cors'); // Import cors
 const morgan = require('morgan');
 
+
 const app = express();
 
 app.use(cors()); // Enable CORS for all routes
 app.use(morgan('tiny')); // Morgan logging middleware
 app.use(express.json()); // Middleware to parse JSON bodies
+app.use(express.static('dist'))
 
 // All the data of the PhoneBook
 let data = [
