@@ -1,14 +1,12 @@
 const express = require('express');
+const cors = require('cors'); // Import cors
+const morgan = require('morgan');
+
 const app = express();
-var morgan = require('morgan')
 
-// Some middleware, has to be declared before routes
-// 1) Actually apply the Morgan middleware
-app.use(morgan('tiny'));
-
-// For parsing JSON bodies in requests:
-app.use(express.json());
-
+app.use(cors()); // Enable CORS for all routes
+app.use(morgan('tiny')); // Morgan logging middleware
+app.use(express.json()); // Middleware to parse JSON bodies
 
 // All the data of the PhoneBook
 let data = [
@@ -50,7 +48,7 @@ app.get('/info' , (req, res) => {
   const dateNow = new Date().toString();
 
   res.send(`
-    <p>PhoneBook has info for 2 people</p>
+    <p>PhoneBook has info for ${data.length} people</p>
     <p>${dateNow}</p>
     `)
 });
@@ -121,7 +119,7 @@ app.post("/api/persons", (req, res) => {
 
 
 // Start the server:
-const PORT = 3000;
+const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  console.log(`Server running on port ${PORT}`)
+})
