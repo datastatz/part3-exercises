@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors'); // Import cors
 const morgan = require('morgan');
+require('dotenv').config() // Load environment variables
+const Person = require('./models/person') // Import Mongoose Model
 
 
 const app = express();
@@ -10,118 +12,80 @@ app.use(morgan('tiny')); // Morgan logging middleware
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(express.static('dist'))
 
-// All the data of the PhoneBook
-let data = [
-  { 
-    "id": "1",
-    "name": "Arto Hellas", 
-    "number": "040-123456"
-  },
-  { 
-    "id": "2",
-    "name": "Ada Lovelace", 
-    "number": "39-44-5323523"
-  },
-  { 
-    "id": "3",
-    "name": "Dan Abramov", 
-    "number": "12-43-234345"
-  },
-  { 
-    "id": "4",
-    "name": "Mary Poppendieck", 
-    "number": "39-23-6423122"
-  }
-]
-
-
-
 
 
 // GET request route
 app.get('/api/persons', (req, res) => {
-  res.json(data);
-});
-
-// Get request route
-app.get('/info' , (req, res) => {
-
-  // const that create a new Date object
-  const dateNow = new Date().toString();
-
-  res.send(`
-    <p>PhoneBook has info for ${data.length} people</p>
-    <p>${dateNow}</p>
-    `)
-});
-
-// Get request route for finding individuals
-app.get("/api/persons/:id", (req, res) => {
-  const id = req.params.id
-  const person = data.find(data => data.id === id)
-  res.json(person)
-})
-
-// DELETE request route for deleting a person by id
-app.delete('/api/persons/:id', (req, res) => {
-  const id = req.params.id;
-
-  // Filter out the person with the given id
-  data = data.filter(person => person.id !== id);
-
-  // Respond with status 204 (No Content) indicating successful deletion
-  res.status(204).end();
-});
-
-// Adding names and numbers to the backend
-app.post("/api/persons", (req, res) => {
-  
-  //Body of the request
-  const body = req.body 
-
-  // Check if the name already exists in the data array
-  const nameExists = data.some(person => person.name.toLowerCase() === body.name.toLowerCase());
-
-  if (nameExists) {
-    return res.status(400).json({
-      error: 'name must be unique'
-    });
-  }
-
-  if (!body.name){
-    return res.status(400).json({
-      error: 'content missing'
+  Person.find({})
+    .then((people) => {
+      res.json(people)
     })
-  }
+    .catch((error) => {
+      console.error(error)
+      res.status(500).json({ error: 'Internal server error' })
+    })
+})
 
-  if (!body.number) {
-    return res.status(400).json({ 
-      error: 'Number is missing' 
+
+
+// ✅ **GET /info - Count people in DB**
+app.get('/info', (req, res) => {
+  Person.countDocuments()
+    .then(count => {
+      res.send(`
+        <p>PhoneBook has info for ${count} people</p>
+        <p>${new Date()}</p>
+      `);
+    })
+    .catch(error => {
+      console.error('Error fetching count:', error);
+      res.status(500).json({ error: 'Internal server error' });
     });
+});
+
+// ✅ **GET a single person by ID**
+app.get('/api/persons/:id', (req, res) => {
+  Person.findById(req.params.id)
+    .then(person => {
+      if (person) res.json(person);
+      else res.status(404).json({ error: 'Person not found' });
+    })
+    .catch(error => {
+      console.error('Error fetching person:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    });
+});
+
+// ✅ **DELETE a person from DB**
+app.delete('/api/persons/:id', (req, res) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then(() => res.status(204).end())
+    .catch(error => {
+      console.error('Error deleting person:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    });
+});
+
+// ✅ **POST a new person to DB**
+app.post('/api/persons', (req, res) => {
+  const { name, number } = req.body;
+
+  if (!name || !number) {
+    return res.status(400).json({ error: 'Name and number are required' });
   }
 
-  // Generating a random ID
-  const randID = Math.floor(Math.random() * 1000000).toString()
+  const person = new Person({ name, number });
 
-  // Creating an object for a new entry
-  const newPerson = {
-    id: randID,
-    name: body.name,
-    number: body.number
-  }
+  person.save()
+    .then(savedPerson => res.json(savedPerson))
+    .catch(error => {
+      console.error('Error saving person:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    });
+});
 
-  // Pushin the new entry into our data array
-  data.push(newPerson)
-
-  //Respond with 201 (Created) and the new object named newPerson
-  return res.status(201).json(newPerson)
-})
-
-
-
-
-// Start the server:
-const PORT = process.env.PORT || 3001
+// ✅ **Start the server**
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  console.log(`Server running on port ${PORT}`);
+});
