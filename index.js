@@ -1,15 +1,15 @@
-const express = require('express');
-const cors = require('cors'); // Import cors
-const morgan = require('morgan');
+const express = require('express')
+const cors = require('cors') // Import cors
+const morgan = require('morgan')
 require('dotenv').config() // Load environment variables
 const Person = require('./models/person') // Import Mongoose Model
 
 
-const app = express();
+const app = express()
 
-app.use(cors()); // Enable CORS for all routes
-app.use(morgan('tiny')); // Morgan logging middleware
-app.use(express.json()); // Middleware to parse JSON bodies
+app.use(cors()) // Enable CORS for all routes
+app.use(morgan('tiny')) // Morgan logging middleware
+app.use(express.json()) // Middleware to parse JSON bodies
 app.use(express.static('dist'))
 
 
@@ -35,28 +35,28 @@ app.get('/info', (req, res) => {
       res.send(`
         <p>PhoneBook has info for ${count} people</p>
         <p>${new Date()}</p>
-      `);
+      `)
     })
     .catch(error => {
-      console.error('Error fetching count:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    });
-});
+      console.error('Error fetching count:', error)
+      res.status(500).json({ error: 'Internal server error' })
+    })
+})
 
 // GET a single person by ID
 app.get('/api/persons/:id', (req, res, next) => {
-  const id = req.params.id; // Get ID from the URL
+  const id = req.params.id // Get ID from the URL
 
   Person.findById(id)
     .then((person) => {
       if (person) {
-        res.json(person); // Return the found person
+        res.json(person) // Return the found person
       } else {
-        res.status(404).json({ error: 'Person not found' }); // If no person found
+        res.status(404).json({ error: 'Person not found' }) // If no person found
       }
     })
-    .catch((error) => next(error)); // Pass any errors to the error handler
-});
+    .catch((error) => next(error)) // Pass any errors to the error handler
+})
 
 
 
@@ -66,26 +66,26 @@ app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
     .then((result) => {
       if (result) {
-        res.status(204).end();
+        res.status(204).end()
       } else {
-        res.status(404).json({ error: 'Person not found' });
+        res.status(404).json({ error: 'Person not found' })
       }
     })
-    .catch((error) => next(error)); // Pass error to the middleware
-});
+    .catch((error) => next(error)) // Pass error to the middleware
+})
 
 
 
 // POST a new person to DB
-app.post("/api/persons", (req, res, next) => {
+app.post('/api/persons', (req, res, next) => {
   const { name, number } = req.body
 
   if (!name || !number) {
-    return res.status(400).json({ error: "Name or number is missing" })
+    return res.status(400).json({ error: 'Name or number is missing' })
   }
 
   if (name.length < 3) {
-    return res.status(400).json({ error: "Name must be at least 3 characters long" });
+    return res.status(400).json({ error: 'Name must be at least 3 characters long' })
   }
 
   // Check if the person already exists in the database
@@ -120,7 +120,7 @@ app.put('/api/persons/:id', (req, res, next) => {
   )
     .then(updatedPerson => {
       if (!updatedPerson) {
-        return res.status(404).json({ error: "Person not found" })
+        return res.status(404).json({ error: 'Person not found' })
       }
       res.json(updatedPerson)
     })
@@ -130,23 +130,23 @@ app.put('/api/persons/:id', (req, res, next) => {
 
 // Middleware for error handling
 const errorHandler = (error, req, res, next) => {
-  console.error(error.message);
+  console.error(error.message)
 
   if (error.name === 'CastError') {
-    return res.status(400).json({ error: 'malformatted ID' });
+    return res.status(400).json({ error: 'malformatted ID' })
   } else if (error.name === 'ValidationError') {
-    return res.status(400).json({ error: error.message }); // Send validation error messages to frontend
+    return res.status(400).json({ error: error.message }) // Send validation error messages to frontend
   }
 
-  next(error);
-};
+  next(error)
+}
 
 // Middleware
-app.use(errorHandler);
+app.use(errorHandler)
 
 
 // Start the server
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  console.log(`Server running on port ${PORT}`)
+})
