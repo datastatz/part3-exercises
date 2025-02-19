@@ -84,6 +84,10 @@ app.post("/api/persons", (req, res, next) => {
     return res.status(400).json({ error: "Name or number is missing" })
   }
 
+  if (name.length < 3) {
+    return res.status(400).json({ error: "Name must be at least 3 characters long" });
+  }
+
   // Check if the person already exists in the database
   Person.findOne({ name })
     .then(existingPerson => {
@@ -131,7 +135,7 @@ const errorHandler = (error, req, res, next) => {
   if (error.name === 'CastError') {
     return res.status(400).json({ error: 'malformatted ID' });
   } else if (error.name === 'ValidationError') {
-    return res.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message }); // Send validation error messages to frontend
   }
 
   next(error);
